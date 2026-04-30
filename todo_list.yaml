@@ -1,0 +1,18 @@
+# Things I still need to add (or would be nice to add) to this program
+#
+# Items marked with '#!' should be finished in the current commit
+- app:
+  - gui integration
+  - features
+- readme:
+- generate:
+    gui:
+- scan:
+    shared:
+    - img
+    - txt
+    - mus
+    - snd
+    - fnt
+    cli:
+    gui:
