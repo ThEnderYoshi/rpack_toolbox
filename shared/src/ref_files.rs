@@ -4,7 +4,7 @@
 use std::{
     collections::{HashMap, HashSet},
     fs::File,
-    io::{self, /*BufRead,*/ Write},
+    io::{self, BufRead, BufReader, Write},
     path::Path,
 };
 
@@ -46,7 +46,7 @@ pub fn get_tree_key_value(root: &Path, path: &Path) -> Option<(String, String)> 
 ///
 /// Returns [`None`] if the argument is invalid.
 pub fn get_flat_value(path: &Path) -> Option<String> {
-    Some(path.file_name()?.to_string_lossy().to_string())
+    Some(path.file_stem()?.to_string_lossy().to_string())
 }
 
 /// Writes a [`TreeRef`] to the file at the provided [`Path`].
@@ -78,62 +78,86 @@ pub fn write_flat_ref(path: &Path, format_version: u8, data: FlatRef) -> io::Res
     Ok(())
 }
 
-// pub fn read_tree_ref(path: &Path, format_version: u8) -> crate::Result<TreeRef> {
-//     let file = io::BufReader::new(File::open(path)?);
-//     let mut lines = file.lines();
+pub fn read_flat_ref(path: &Path, format_version: u8) -> crate::Result<FlatRef> {
+    let file = BufReader::new(File::open(path)?);
+    let mut lines = file.lines();
 
-//     // Read format version
-//     let actual: u8 = lines
-//         .next()
-//         .ok_or_else(|| crate::Error::no_format_version(path))??
-//         .parse()
-//         .map_err(|_| crate::Error::no_format_version(path))?;
+    let actual: u8 = lines
+        .next()
+        .ok_or_else(|| crate::Error::no_format_version(path))??
+        .parse()
+        .map_err(|_| crate::Error::no_format_version(path))?;
 
-//     if actual != format_version {
-//         return Err(crate::Error::bad_format_version(
-//             path,
-//             format_version,
-//             actual,
-//         ));
-//     }
+    if actual != format_version {
+        return Err(crate::Error::bad_format_version(
+            path,
+            format_version,
+            actual,
+        ));
+    }
 
-//     // Read first dir
-//     let Some(dir) = lines.next() else {
-//         // File is empty. This shouldn't happen if the file was created by
-//         // `generate`, but it's technically valid
-//         return Ok(TreeRef::new());
-//     };
+    let result: Result<_, _> = lines.collect();
+    Ok(result?)
+}
 
-//     let dir = dir?;
+pub fn read_tree_ref(path: &Path, format_version: u8) -> crate::Result<TreeRef> {
+    let file = BufReader::new(File::open(path)?);
+    let mut lines = file.lines();
 
-//     if !dir.starts_with('/') {
-//         return Err(crate::Error::bad_ref_file(
-//             path,
-//             "second line of tree ref must be a directory",
-//         ));
-//     }
+    // Read format version
+    let actual: u8 = lines
+        .next()
+        .ok_or_else(|| crate::Error::no_format_version(path))??
+        .parse()
+        .map_err(|_| crate::Error::no_format_version(path))?;
 
-//     let mut tree = TreeRef::new();
-//     tree.insert(dir.clone(), HashSet::new());
-//     let mut current_set = tree.get_mut(&dir).unwrap(); // Never panics
+    if actual != format_version {
+        return Err(crate::Error::bad_format_version(
+            path,
+            format_version,
+            actual,
+        ));
+    }
 
-//     // Read remaining lines
-//     for line in lines {
-//         let line = line?;
+    // Read first dir
+    let Some(dir) = lines.next() else {
+        // File is empty. This shouldn't happen if the file was created by
+        // `generate`, but it's technically valid
+        return Ok(TreeRef::new());
+    };
 
-//         // Add name to current dir
-//         if !line.starts_with('/') {
-//             current_set.insert(line);
-//             continue;
-//         }
+    let dir = dir?;
 
-//         // Add dir
-//         tree.insert(line.clone(), HashSet::new());
-//         current_set = tree.get_mut(&line).unwrap(); // Never panics
-//     }
+    if !dir.starts_with('/') {
+        return Err(crate::Error::bad_ref_file(
+            path,
+            "second line of tree ref must be a directory",
+        ));
+    }
 
-//     Ok(tree)
-// }
+    let dir = &dir[1..];
+    let mut tree = TreeRef::new();
+    tree.insert(dir.to_string(), HashSet::new());
+    let mut current_set = tree.get_mut(dir).unwrap(); // Never panics
+
+    // Read remaining lines
+    for line in lines {
+        let line = line?;
+
+        // Add name to current dir
+        if !line.starts_with('/') {
+            current_set.insert(line);
+            continue;
+        }
+
+        // Add dir
+        let line = &line[1..];
+        tree.insert(line.to_string(), HashSet::new());
+        current_set = tree.get_mut(line).unwrap(); // Never panics
+    }
+
+    Ok(tree)
+}
 
 /// Converts an [`ImageSize`] into its [`String`] representation.
 ///
@@ -142,16 +166,16 @@ pub fn get_size_string(size: ImageSize) -> String {
     format!("{}x{}", size.width, size.height)
 }
 
-// /// Parses the provided string into an [`ImageSize`], or returns [`None`] if it
-// /// doesn't follow the format.
-// ///
-// /// `raw` is expected to be in the format `<W>x<H>`, where `<W>` and `<H>` are
-// /// valid [`usize`] strings.
-// ///
-// /// See also [`get_size_string`].
-// pub fn parse_size_string(raw: &str) -> Option<ImageSize> {
-//     let (width, height) = raw.split_once('x')?;
-//     let width: usize = width.parse().ok()?;
-//     let height: usize = height.parse().ok()?;
-//     Some(ImageSize { width, height })
-// }
+/// Parses the provided string into an [`ImageSize`], or returns [`None`] if it
+/// doesn't follow the format.
+///
+/// `raw` is expected to be in the format `<W>x<H>`, where `<W>` and `<H>` are
+/// valid [`usize`] strings.
+///
+/// See also [`get_size_string`].
+pub fn parse_size_string(raw: &str) -> Option<ImageSize> {
+    let (width, height) = raw.split_once('x')?;
+    let width: usize = width.parse().ok()?;
+    let height: usize = height.parse().ok()?;
+    Some(ImageSize { width, height })
+}

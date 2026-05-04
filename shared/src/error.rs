@@ -23,6 +23,10 @@ pub enum Error {
     #[error("invalid reference file `{}`: {message}", path.display())]
     BadRefFile { path: PathBuf, message: String },
 
+    /// Wrapper for [`csv::Error`].
+    #[error("csv error: {0}")]
+    Csv(#[from] csv::Error),
+
     /// Wrapper for [`imagesize::ImageError`].
     #[error("image error: {0}")]
     ImageSize(#[from] imagesize::ImageError),
@@ -34,6 +38,10 @@ pub enum Error {
     /// Wrapper for [`json5::Error`].
     #[error("json error: {0}")]
     Json5(#[from] json5::Error),
+
+    /// Wrapper for [`std::path::StripPrefixError`].
+    #[error("path error: {0}")]
+    StripPrefix(#[from] std::path::StripPrefixError),
 
     /// Wrapper for [`tokio::task::JoinError`].
     #[error("async error: {0}")]

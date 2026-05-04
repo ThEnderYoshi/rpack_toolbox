@@ -1,13 +1,12 @@
-//! This module defines the "Generate Reference Files" job.
+//! This module defines the "Generate" tool.
 //!
 //! See [`run_job`] for more information.
 
 use std::{fs, path::PathBuf};
 
 use log::info;
-use tokio::task::JoinHandle;
 
-use crate::reporter::Reporter;
+use crate::{reporter::Reporter, sync};
 
 mod fonts;
 mod images;
@@ -15,7 +14,7 @@ mod music;
 mod sounds;
 mod translations;
 
-/// Executes the "Generate Reference Files" job.
+/// Executes the "Generate" tool.
 ///
 /// `extracted_dir` should be a path to where the files extracted with
 /// `TConvert` and `TerrariaLocalizationPacker` were dumped to.
@@ -59,17 +58,17 @@ pub async fn run_job(
         tokio::spawn(async move { translations::generate(r_txt, extracted_dir, out_dir_clone) });
 
     tokio::try_join!(
-        flatten(fnt),
-        flatten(img),
-        flatten(mus),
-        flatten(snd),
-        flatten(txt),
+        sync::flatten(fnt),
+        sync::flatten(img),
+        sync::flatten(mus),
+        sync::flatten(snd),
+        sync::flatten(txt),
     )?;
 
     info!("Files written to `{}`", out_dir.display());
     Ok(())
 }
 
-async fn flatten<T>(handle: JoinHandle<crate::Result<T>>) -> crate::Result<T> {
-    handle.await?
-}
+// async fn flatten<T>(handle: JoinHandle<crate::Result<T>>) -> crate::Result<T> {
+//     handle.await?
+// }

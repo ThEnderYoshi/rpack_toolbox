@@ -1,18 +1,38 @@
 # Things I still need to add (or would be nice to add) to this program
 #
-# Items marked with '#!' should be finished in the current commit
-- app:
-  - gui integration
-  - features
-- readme:
-- generate:
-    gui:
-- scan:
-    shared:
-    - img
-    - txt
-    - mus
-    - snd
-    - fnt
-    cli:
-    gui:
+# Items marked with '#!' should be finished in the current commit (ideally 🫵YOU
+# wouldn't see them..)
+#
+# Items marked with '#v <...>' should be finished by the time version
+# '<...>' releases
+app:
+- gui integration              #v <gui>
+- features to toggle frontends #v <gui>
+readme: #v 0.1.0
+cli:
+- split lib.rs for each tool
+- allow Args to set verbosity #v 0.1.0
+generate:
+  gui: #v <gui>
+scan:
+  txt:
+    properly truncate paths:  #v 0.1.0
+    detect duplicate entries: #v 0.1.0
+    read json translations:   #v 0.1.0
+  truncated paths should include the extension:
+  gui: #v <gui>
+jigsaw:
+  shared:
+  cli:
+  gui: #v <gui>
+build:
+  shared:
+  cli:
+  gui: #v <gui>
+nice to have:
+  proper specs for the ref files:
+  - flat ref
+  - tree ref
+  for invalid file names, have the scanner try to find similar names in the ref:
+  optional suggestion list for scan:
+  allow black/whitelisting asset kinds in scan:

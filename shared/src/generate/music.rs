@@ -78,6 +78,14 @@ fn process_entry(
         return Ok(());
     };
 
-    sender.send(Some(number.into())).unwrap();
+    // Parse into int then re-serialize to remove leading zeros
+    // Fall back to raw str if it can't be parsed
+    let number = match number.parse::<u16>() {
+        Ok(n) => n.to_string(),
+        Err(_) => number.to_string(),
+    };
+
+    let name = format!("Music_{number}");
+    sender.send(Some(name)).unwrap();
     Ok(())
 }

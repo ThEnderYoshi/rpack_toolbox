@@ -78,14 +78,4 @@ fn process_entry(
     let maybe_name = path.strip_suffix("_0").map(|s| s.to_string());
     sender.send(maybe_name).unwrap();
     Ok(())
-    // if !path.ends_with("_0") {
-    //     sender.send(None).unwrap();
-    //     return Ok(());
-    // }
-
-    // let end = path.len() - "_0".len();
-    // let name = path[..end].to_string();
-    // path.strip_suffix(suffix)
-    // sender.send(Some(name)).unwrap();
-    // Ok(())
 }
