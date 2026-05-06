@@ -4,9 +4,13 @@
 
 use clap::{Parser, Subcommand};
 // use clap_verbosity_flag::{InfoLevel, Verbosity};
-use clio::ClioPath;
+use clio::{ClioPath, Output};
 
+/// Multipurpose tool to aid in the creation of Terraria resource packs
+///
+/// For more information, see <https://github.com/ThEnderYoshi/rpack_toolbox>
 #[derive(Parser)]
+#[command(name = "rpack_toolbox")]
 pub struct Args {
     // #[command(flatten)]
     // pub verbosity: Verbosity<InfoLevel>,
@@ -53,5 +57,13 @@ pub enum Job {
         /// Path to the dir with the reference files created by `gen`
         #[arg(value_parser = clap::value_parser!(ClioPath).is_dir().exists())]
         ref_dir: ClioPath,
+
+        /// If set, the scan data will be dumped to a JSON file at the specified
+        /// path, or to stdout if '-' is passed
+        ///
+        /// TIP: This is the only output of this tool that writes to stdout.
+        /// Everything else is written to stderr
+        #[arg(long, short, value_parser)]
+        dump: Option<Output>,
     },
 }

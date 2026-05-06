@@ -13,6 +13,7 @@ packs](https://terraria.wiki.gg/wiki/Resource_Pack).
   this once every game update.
 - `scan`: Counts how many assets have been replaced, detects invalid assets and
   displays other useful information about your pack.
+  - `scan`'s insights can also be dumped to a JSON file.
 
 ## Installation and Setup
 

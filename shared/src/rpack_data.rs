@@ -2,8 +2,10 @@
 
 use std::fmt::Display;
 
+use serde_with::SerializeDisplay;
+
 /// The possible kinds of assets resource packs can replace.
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, SerializeDisplay)]
 pub enum AssetKind {
     Font,
     Image,

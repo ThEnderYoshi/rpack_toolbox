@@ -16,7 +16,6 @@ generate:
   gui: #v <gui>
 scan:
   txt:
-  json dump: #v 0.1.0
   truncated paths should include the extension: #v 0.1.0
   gui: #v <gui>
 jigsaw:

@@ -28,7 +28,8 @@ pub async fn run() -> shared::Result<()> {
         Job::Scan {
             content_dir,
             ref_dir,
-        } => scan(content_dir, ref_dir).await,
+            dump,
+        } => scan(content_dir, ref_dir, dump).await,
     }
 }
 
@@ -61,7 +62,11 @@ struct ScanTable {
     total: u16,
 }
 
-async fn scan(content_dir: ClioPath, ref_dir: ClioPath) -> shared::Result<()> {
+async fn scan(
+    content_dir: ClioPath,
+    ref_dir: ClioPath,
+    dump: Option<clio::Output>,
+) -> shared::Result<()> {
     let mp = MultiProgress::new();
 
     let reporters = [
@@ -72,8 +77,13 @@ async fn scan(content_dir: ClioPath, ref_dir: ClioPath) -> shared::Result<()> {
         get_progress_bar(&mp, "Translations"),
     ];
 
-    let results =
-        shared::scan::run_job(content_dir.to_path_buf(), ref_dir.to_path_buf(), reporters).await?;
+    let results = shared::scan::run_job(
+        content_dir.to_path_buf(),
+        ref_dir.to_path_buf(),
+        reporters,
+        dump,
+    )
+    .await?;
 
     let mut result_table = vec![];
     let mut problems = vec![];

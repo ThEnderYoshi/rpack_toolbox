@@ -2,10 +2,10 @@
 //!
 //! See [`run_job`] for more information.
 
-use std::{collections::HashMap, fmt::Display, path::PathBuf};
+use std::{collections::HashMap, fmt::Display, io::Write, path::PathBuf};
 
 use log::info;
-use serde::Deserialize;
+use serde::Serialize;
 
 use crate::{reporter::Reporter, rpack_data::AssetKind, sync};
 
@@ -16,7 +16,7 @@ mod sounds;
 mod translations;
 
 /// The data collected by one of the scanners.
-#[derive(Deserialize)]
+#[derive(Serialize)]
 pub struct ScanData {
     /// The amount of valid assets of this kind in the resource pack.
     pub replaced: u16,
@@ -39,7 +39,7 @@ impl ScanData {
 }
 
 /// Represents an invalid asset encountered by a scanner.
-#[derive(Deserialize)]
+#[derive(Serialize)]
 pub struct InvalidAsset {
     /// The path to the asset, relative to the resource pack's root.
     pub path: PathBuf,
@@ -80,6 +80,7 @@ pub async fn run_job(
     pack_root: PathBuf,
     ref_dir: PathBuf,
     reporters: [impl Reporter + Send + 'static; 5],
+    dump: Option<impl Write>,
 ) -> crate::Result<HashMap<AssetKind, ScanData>> {
     info!(
         "Scanning resource pack `{}`...",
@@ -145,5 +146,11 @@ pub async fn run_job(
     }
 
     info!("Scan complete");
+
+    if let Some(dump) = dump {
+        serde_json::to_writer(dump, &results)?;
+        info!("Dumped data to specified file");
+    }
+
     Ok(results)
 }
