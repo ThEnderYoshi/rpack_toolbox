@@ -35,6 +35,10 @@ pub enum Error {
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
 
+    /// Wrapper for [`serde_json::Error`].
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
+
     /// Wrapper for [`json5::Error`].
     #[error("json error: {0}")]
     Json5(#[from] json5::Error),

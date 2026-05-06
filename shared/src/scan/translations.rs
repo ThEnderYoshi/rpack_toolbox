@@ -3,6 +3,7 @@
 use std::{
     collections::{HashMap, HashSet},
     ffi::OsStr,
+    fs,
     path::{Path, PathBuf},
     sync::{
         Arc, Mutex,
@@ -40,6 +41,8 @@ struct CsvRecord {
     #[serde(rename = "Translation")]
     _translation: String,
 }
+
+type JsonFile = HashMap<String, HashMap<String, String>>;
 
 impl TranslationRef {
     fn load(path: &Path, root: PathBuf) -> crate::Result<Self> {
@@ -116,34 +119,76 @@ impl TranslationRef {
                 continue;
             }
 
-            let result = if !self.data.contains(&key) {
-                InvalidAsset::new(rel_path, format!("invalid key: {key}")).into()
-            } else {
-                let mut found = self.found[&lang].lock().unwrap();
-
-                if let Some(also) = found.get(&key) {
-                    InvalidAsset::new(
-                        rel_path,
-                        format!("duplicate key: {key} (also in {})", also.display()),
-                    )
-                    .into()
-                } else {
-                    found.insert(key, rel_path.to_path_buf());
-                    ScanResult::Valid
-                }
-            };
-
-            // let result = if self.data.contains(&key) {
-            //     ScanResult::Valid
-            // } else {
-            //     InvalidAsset::new(rel_path, format!("invalid key: {}", key)).into()
-            // };
-
+            let result = self.validate_key(key, &lang, rel_path);
             sender.send(ProcessResult::Entry { lang, result }).unwrap();
         }
 
         sender.send(ProcessResult::FileFinished).unwrap();
         Ok(())
+    }
+
+    fn validate_json(&self, sender: &Sender<ProcessResult>, path: &Path) -> crate::Result<()> {
+        let rel_path = path.strip_prefix(&self.root)?;
+
+        let Some(name) = path.file_name().map(|n| n.to_string_lossy()) else {
+            sender
+                .send(ProcessResult::InvalidFile(InvalidAsset::new(
+                    rel_path,
+                    "invalid file name",
+                )))
+                .unwrap();
+
+            return Ok(());
+        };
+
+        let Some(lang) = Language::from_start_of_string(&name) else {
+            sender
+                .send(ProcessResult::InvalidFile(InvalidAsset::new(
+                    rel_path,
+                    "no valid language code",
+                )))
+                .unwrap();
+
+            return Ok(());
+        };
+
+        let file: JsonFile = serde_json::from_reader(fs::File::open(path)?)?;
+
+        for (category, key_values) in file {
+            // We treat categories starting with # as comments, so let's
+            // skip them
+            if category.starts_with('#') {
+                continue;
+            }
+
+            for (key, _) in key_values {
+                let key = format!("{category}.{key}");
+                let result = self.validate_key(key, &lang, rel_path);
+                sender.send(ProcessResult::Entry { lang, result }).unwrap();
+            }
+        }
+
+        sender.send(ProcessResult::FileFinished).unwrap();
+        Ok(())
+    }
+
+    fn validate_key(&self, key: String, lang: &Language, path: &Path) -> ScanResult {
+        if !self.data.contains(&key) {
+            return InvalidAsset::new(path, format!("invalid key: {key}")).into();
+        }
+
+        let mut found = self.found[lang].lock().unwrap();
+
+        if let Some(also) = found.get(&key) {
+            InvalidAsset::new(
+                path,
+                format!("duplicate key: {key} (also in {})", also.display()),
+            )
+            .into()
+        } else {
+            found.insert(key, path.to_path_buf());
+            ScanResult::Valid
+        }
     }
 }
 
@@ -227,14 +272,7 @@ fn process_entry(
     if ext == Some(OsStr::new("csv")) {
         txt_ref.validate_csv(sender, &path)
     } else if ext == Some(OsStr::new("json")) {
-        sender
-            .send(ProcessResult::InvalidFile(InvalidAsset::new(
-                path,
-                "json files not yet supported",
-            )))
-            .unwrap();
-
-        Ok(())
+        txt_ref.validate_json(sender, &path)
     } else {
         sender
             .send(ProcessResult::InvalidFile(InvalidAsset::new(
