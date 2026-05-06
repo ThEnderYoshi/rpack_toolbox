@@ -43,9 +43,9 @@ impl SoundRef {
     }
 
     fn validate(&self, path: &Path) -> crate::Result<ScanResult> {
-        let ref_path = path.strip_prefix(&self.root)?.with_extension("");
+        let ref_path = path.strip_prefix(&self.root)?;
 
-        if self.data.contains(&ref_path) {
+        if self.data.contains(&ref_path.with_extension("")) {
             Ok(ScanResult::Valid)
         } else {
             Ok(InvalidAsset::new(ref_path, "invalid file name").into())

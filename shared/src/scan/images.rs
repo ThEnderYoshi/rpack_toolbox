@@ -27,10 +27,10 @@ struct ImageRef {
 
 impl ImageRef {
     fn validate(&self, path: &Path) -> crate::Result<ScanResult> {
-        let ref_path = path.strip_prefix(&self.root)?.with_extension("");
+        let rel_path = path.strip_prefix(&self.root)?;
 
-        let Some(ref_size) = self.data.get(&ref_path) else {
-            return Ok(InvalidAsset::new(ref_path, "invalid file name").into());
+        let Some(ref_size) = self.data.get(&rel_path.with_extension("")) else {
+            return Ok(InvalidAsset::new(rel_path, "invalid file name").into());
         };
 
         let size = imagesize::size(path)?;
@@ -39,7 +39,7 @@ impl ImageRef {
             ScanResult::Valid
         } else {
             InvalidAsset::new(
-                ref_path,
+                rel_path,
                 format!(
                     "wrong image size (expected {}, got {})",
                     ref_files::get_size_string(*ref_size),

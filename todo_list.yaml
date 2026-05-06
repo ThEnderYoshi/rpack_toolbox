@@ -14,7 +14,6 @@ cli:
 generate:
   gui: #v <gui>
 scan:
-  truncated paths should include the extension: #v 0.1.0
   gui: #v <gui>
 jigsaw:
   shared:
@@ -28,6 +27,7 @@ nice to have:
   proper specs for the ref files:
   - flat ref
   - tree ref
+  - scan dump* # *There's a doc, but it's not a "proper" spec
   for invalid file names, have the scanner try to find similar names in the ref:
   optional suggestion list for scan:
   allow black/whitelisting asset kinds in scan:
