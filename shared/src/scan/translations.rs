@@ -5,7 +5,7 @@ use std::{
     ffi::OsStr,
     path::{Path, PathBuf},
     sync::{
-        Arc,
+        Arc, Mutex,
         mpsc::{self, Sender},
     },
 };
@@ -29,6 +29,8 @@ enum ProcessResult {
 
 struct TranslationRef {
     data: HashSet<String>,
+    root: PathBuf,
+    found: HashMap<Language, Mutex<HashMap<String, PathBuf>>>,
 }
 
 #[derive(Deserialize)]
@@ -40,7 +42,7 @@ struct CsvRecord {
 }
 
 impl TranslationRef {
-    fn load(path: &Path) -> crate::Result<Self> {
+    fn load(path: &Path, root: PathBuf) -> crate::Result<Self> {
         let raw = ref_files::read_tree_ref(path, ref_files::FORMAT_TXT)?;
         let mut data = HashSet::new();
 
@@ -54,16 +56,31 @@ impl TranslationRef {
             }
         }
 
-        Ok(Self { data })
+        let found = HashMap::from([
+            (Language::English, Mutex::new(HashMap::new())),
+            (Language::German, Mutex::new(HashMap::new())),
+            (Language::Italian, Mutex::new(HashMap::new())),
+            (Language::French, Mutex::new(HashMap::new())),
+            (Language::Spanish, Mutex::new(HashMap::new())),
+            (Language::Russian, Mutex::new(HashMap::new())),
+            (Language::ChineseSimplified, Mutex::new(HashMap::new())),
+            (Language::ChineseTraditional, Mutex::new(HashMap::new())),
+            (Language::Portuguese, Mutex::new(HashMap::new())),
+            (Language::Polish, Mutex::new(HashMap::new())),
+            (Language::Japanese, Mutex::new(HashMap::new())),
+            (Language::Korean, Mutex::new(HashMap::new())),
+        ]);
+
+        Ok(Self { data, root, found })
     }
 
     fn validate_csv(&self, sender: &Sender<ProcessResult>, path: &Path) -> crate::Result<()> {
-        let mut reader = csv::Reader::from_path(path)?;
+        let rel_path = path.strip_prefix(&self.root)?;
 
         let Some(name) = path.file_name().map(|n| n.to_string_lossy()) else {
             sender
                 .send(ProcessResult::InvalidFile(InvalidAsset::new(
-                    path,
+                    rel_path,
                     "invalid file name",
                 )))
                 .unwrap();
@@ -74,13 +91,15 @@ impl TranslationRef {
         let Some(lang) = Language::from_start_of_string(&name) else {
             sender
                 .send(ProcessResult::InvalidFile(InvalidAsset::new(
-                    path,
+                    rel_path,
                     "no valid language code",
                 )))
                 .unwrap();
 
             return Ok(());
         };
+
+        let mut reader = csv::Reader::from_path(path)?;
 
         for record in reader.deserialize() {
             let CsvRecord { key, .. } = record?;
@@ -97,11 +116,28 @@ impl TranslationRef {
                 continue;
             }
 
-            let result = if self.data.contains(&key) {
-                ScanResult::Valid
+            let result = if !self.data.contains(&key) {
+                InvalidAsset::new(rel_path, format!("invalid key: {key}")).into()
             } else {
-                InvalidAsset::new(path, format!("invalid key: {}", key)).into()
+                let mut found = self.found[&lang].lock().unwrap();
+
+                if let Some(also) = found.get(&key) {
+                    InvalidAsset::new(
+                        rel_path,
+                        format!("duplicate key: {key} (also in {})", also.display()),
+                    )
+                    .into()
+                } else {
+                    found.insert(key, rel_path.to_path_buf());
+                    ScanResult::Valid
+                }
             };
+
+            // let result = if self.data.contains(&key) {
+            //     ScanResult::Valid
+            // } else {
+            //     InvalidAsset::new(rel_path, format!("invalid key: {}", key)).into()
+            // };
 
             sender.send(ProcessResult::Entry { lang, result }).unwrap();
         }
@@ -125,7 +161,7 @@ pub fn scan(
     }
 
     let txt_ref = ref_dir.join("translations.txt");
-    let txt_ref = Arc::new(TranslationRef::load(&txt_ref)?);
+    let txt_ref = Arc::new(TranslationRef::load(&txt_ref, txt_dir.clone())?);
 
     let task_size = WalkDir::new(&txt_dir).into_iter().count();
     reporter.report_init(task_size);

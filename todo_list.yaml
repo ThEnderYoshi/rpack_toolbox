@@ -16,8 +16,6 @@ generate:
   gui: #v <gui>
 scan:
   txt:
-    properly truncate paths:  #v 0.1.0
-    detect duplicate entries: #v 0.1.0
     read json translations:   #v 0.1.0
   truncated paths should include the extension:
   gui: #v <gui>

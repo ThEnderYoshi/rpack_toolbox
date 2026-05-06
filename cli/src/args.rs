@@ -42,6 +42,9 @@ pub enum Job {
     /// - Count the amount of assets replaced
     ///
     /// - Detect invalid assets
+    ///
+    /// - Detect duplicate translation keys (takes multiple languages
+    ///   into account)
     Scan {
         /// Path to the root dir of the resource pack
         #[arg(value_parser = clap::value_parser!(ClioPath).is_dir().exists())]

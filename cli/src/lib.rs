@@ -111,7 +111,7 @@ async fn scan(content_dir: ClioPath, ref_dir: ClioPath) -> shared::Result<()> {
 
     for (kind, problem) in problems {
         eprintln!(
-            "- {} {}:\t{}",
+            "{:>20} {}:\t{}",
             kind.to_string().bright_black().bold(),
             problem.path.display().to_string().red().bold(),
             problem.msg,
