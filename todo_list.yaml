@@ -10,12 +10,10 @@ app:
 - features to toggle frontends #v <gui>
 readme: #v 0.1.0
 cli:
-- split lib.rs for each tool
 - allow Args to set verbosity #v 0.1.0
 generate:
   gui: #v <gui>
 scan:
-  txt:
   truncated paths should include the extension: #v 0.1.0
   gui: #v <gui>
 jigsaw:
