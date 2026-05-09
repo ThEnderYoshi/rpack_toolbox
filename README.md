@@ -63,13 +63,17 @@ $ cd rpack_toolbox
 $ cargo build --release
 ```
 
-The program will be in the `target` dir. To only build with one of
+The program will be in the `target/release` dir.
+
+<!-- NOTE: Uncomment when features are added
+To only build with one of
 the frontends, enable only one of the `gui` or `cli` features:
 
 ```bash
 $ cargo build --release --no-default-features -F gui
 $ cargo build --release --no-default-features -F cli
 ```
+-->
 
 <!-- References -->
 

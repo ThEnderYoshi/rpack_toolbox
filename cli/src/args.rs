@@ -3,8 +3,14 @@
 //! See [`Args`] for more information.
 
 use clap::{Parser, Subcommand};
-// use clap_verbosity_flag::{InfoLevel, Verbosity};
+use clap_verbosity_flag::{InfoLevel, Verbosity};
 use clio::{ClioPath, Output};
+
+/// Alias for [`Args::parse`], so you don't have to import [`clap::Parser`] to
+/// parse the command line arguments.
+pub fn parse() -> Args {
+    Args::parse()
+}
 
 /// Multipurpose tool to aid in the creation of Terraria resource packs
 ///
@@ -12,8 +18,9 @@ use clio::{ClioPath, Output};
 #[derive(Parser)]
 #[command(name = "rpack_toolbox")]
 pub struct Args {
-    // #[command(flatten)]
-    // pub verbosity: Verbosity<InfoLevel>,
+    #[command(flatten)]
+    pub verbosity: Verbosity<InfoLevel>,
+
     #[command(subcommand)]
     pub job: Job,
 }

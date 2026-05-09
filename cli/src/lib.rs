@@ -1,20 +1,21 @@
 //! This crate implements the program's Command Line Interface.
 
-mod args;
-mod generate;
-mod reporter;
-mod scan;
-
 use clap::Parser;
 use indicatif::{MultiProgress, ProgressBar, ProgressFinish, ProgressStyle};
 use log::debug;
 
 use crate::{args::Job, reporter::CliReporter};
 
+pub mod args;
+
+mod generate;
+mod reporter;
+mod scan;
+
 /// Runs the CLI frontent.
-pub async fn run() -> shared::Result<()> {
+pub async fn run(args: args::Args) -> shared::Result<()> {
     debug!("Started CLI frontend");
-    let args = args::Args::parse();
+    // let args = args::Args::parse();
 
     match args.job {
         Job::Gen {

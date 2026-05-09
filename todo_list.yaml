@@ -9,8 +9,6 @@ app:
 - gui integration              #v <gui>
 - features to toggle frontends #v <gui>
 readme: #v 0.1.0
-cli:
-- allow Args to set verbosity #v 0.1.0
 generate:
   gui: #v <gui>
 scan:
@@ -31,3 +29,7 @@ nice to have:
   for invalid file names, have the scanner try to find similar names in the ref:
   optional suggestion list for scan:
   allow black/whitelisting asset kinds in scan:
+  unify generate logic:
+  unify scan logic:
+  add a fake resource pack and references as examples:
+  add unit tests: # Depends on the item above
