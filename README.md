@@ -9,11 +9,13 @@ packs](https://terraria.wiki.gg/wiki/Resource_Pack).
 
 ## Features
 
-RPack Toolbox's features are divided into Tools. The tools are as follows:
+RPack Toolbox's features are divided into Tools.
 
 > [!TIP]
 > On the CLI, you can use the `help` command to get more specifc details and
 > instructions for each tool.
+
+The tools are as follows:
 
 ### Scan
 
@@ -43,8 +45,8 @@ game assets.
 Before you install, you currently need to also install trigger-segfault's
 [TConvert](https://github.com/trigger-segfault/TConvert) and
 [TerrariaLocalizationPacker](https://github.com/trigger-segfault/TerrariaLocalizationPacker)
-tools so you can extract the game files. RPack expects the extracted assets to
-be layed out in the exact way these programs dump them.
+tools so you can extract the game's assets. RPack expects the extracted assets
+to be layed out in the exact way these programs write them.
 
 Use both of those tools to extract the game's assets. They can be extracted
 wherever you want, just make sure *both of them write files to the same folder*.
@@ -62,10 +64,10 @@ ExtractedTerraria/
     <a bunch of json files>
 ```
 
-We'll need those files to generate the reference files used by the `scan` tool.
+We'll need those files to generate the reference files used by the Scan tool.
 
-Now, install this tool. Just look at the latest release to the right, go down to
-the `Assets` section, and download the file named after your system.
+Now, install this program. Just look at the latest release to the right, go down
+to the `Assets` section, and download the file named after your system.
 
 Run the program from the command line with the following arguments:
 
@@ -83,8 +85,8 @@ them to generate the reference files. From there you can start using the tool!
 
 ## License
 
-This program is licensed under the
-[GNU General Public License version 3.0](LICENSE).
+This program is licensed under the [GNU General Public License
+version 3.0](LICENSE).
 
 ## Junk for Nerds
 
