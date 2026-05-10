@@ -1,6 +1,5 @@
 //! This crate implements the program's Command Line Interface.
 
-use clap::Parser;
 use indicatif::{MultiProgress, ProgressBar, ProgressFinish, ProgressStyle};
 use log::debug;
 
@@ -12,12 +11,11 @@ mod generate;
 mod reporter;
 mod scan;
 
-/// Runs the CLI frontent.
+/// Runs the CLI frontend.
 pub async fn run(args: args::Args) -> shared::Result<()> {
     debug!("Started CLI frontend");
-    // let args = args::Args::parse();
 
-    match args.job {
+    let result = match args.job {
         Job::Gen {
             extracted_dir,
             ref_dir,
@@ -27,7 +25,10 @@ pub async fn run(args: args::Args) -> shared::Result<()> {
             ref_dir,
             dump,
         } => scan::run(content_dir, ref_dir, dump).await,
-    }
+    };
+
+    debug!("Finished CLI frontend");
+    result
 }
 
 // NOTE: Used by some of the modules

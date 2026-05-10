@@ -1,8 +1,14 @@
-//! This crate represents the final binary of the program.
+//! This crate implements the main binary of the program.
 
 #[tokio::main]
 async fn main() -> shared::Result<()> {
-    run_cli().await
+    let result = run_cli().await;
+
+    if let Err(e) = &result {
+        log::error!("{e}");
+    }
+
+    result
 }
 
 async fn run_cli() -> shared::Result<()> {

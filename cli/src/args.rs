@@ -46,7 +46,7 @@ pub enum Job {
     /// Scans a resource pack to detect problems and give other useful insight
     ///
     /// The scanner needs the reference files created by the `gen` command
-    /// to work.
+    /// to work
     ///
     /// The insights given are as follows (more may be added in the future):
     ///
@@ -66,10 +66,11 @@ pub enum Job {
         ref_dir: ClioPath,
 
         /// If set, the scan data will be dumped to a JSON file at the specified
-        /// path, or to stdout if '-' is passed
+        /// path, or to stdout if '-' is provided
         ///
         /// TIP: This is the only output of this tool that writes to stdout.
-        /// Everything else is written to stderr
+        /// Everything else is written to stderr, which means you can easily
+        /// pipe this data into another program
         #[arg(long, short, value_parser)]
         dump: Option<Output>,
     },
