@@ -1,2 +1,4 @@
 /.ignore
+/.release
+/__pycache__
 /target

@@ -1,0 +1,117 @@
+"""build.py v1.0.0
+
+    For Python 3.12.3
+    By ThEnderYoshi, 2026
+    Under the GPL-3.0 license
+
+    SYNOPSIS:
+        python3 build.py
+
+    DESCRIPTION:
+        Builds RPack Toolbox in release mode and creates zip files for
+        each supported target.
+
+        NOTE: Currently compiles the Linux target with cargo instead
+        of cross
+
+    DEPENDENCIES:
+        Cargo  ^1.95.0 (Rust CLI) <https://doc.rust-lang.org/cargo>
+        cross  ^0.2.5  (Rust CLI) <https://github.com/cross-rs/cross>
+            rustup
+            Docker/podman
+        gzip   *       (should come with CPython)
+"""
+
+
+import subprocess
+import tarfile
+
+from zipfile import ZipFile
+
+
+TARGETS = [
+    ("x86_64-unknown-linux-gnu", "linux_x86_64", False),
+    ("x86_64-pc-windows-gnu", "win_x86_64", True),
+]
+
+
+def info(*args, **kwargs) -> None:
+    """Alias of 'print' with a common prefix."""
+
+    print("[build.py]", *args, **kwargs)
+
+
+def compile_for(target: str) -> None:
+    """Compiles RPack Toolbox for the specified target."""
+
+    info(f"Compiling target '{target}'...")
+    args = ["cross", "build", "--release", "--target", target]
+
+    # HACK: For some reason I can't get cross to compile for the
+    # Linux target
+    if "linux" in target:
+        args[0] = "cargo"
+
+    cmp = subprocess.run(args, text=True)
+
+    if cmp.returncode != 0:
+        raise RuntimeError(
+            f"'{" ".join(args)}' returned the non-0 code '{cmp.returncode}'",
+        )
+
+
+def write_tar(target: str, path: str) -> None:
+    """Writes a release package as a tar file."""
+
+    path += ".tar.gz"
+    info(f"Writing '{path}'...")
+
+    with tarfile.open(path, "w:gz") as tar:
+        tar.add(f"target/{target}/release/rpack_toolbox", "rpack_toolbox")
+
+
+def write_zip(target: str, path: str) -> None:
+    """Writes a release package as a zip file."""
+
+    path += ".zip"
+    info(f"Writing '{path}'...")
+
+    with ZipFile(path, "w") as zip:
+        zip.write(
+            f"target/{target}/release/rpack_toolbox.exe",
+            "rpack_toolbox.exe",
+        )
+
+
+def build(target: str, out_suffix: str, win: bool = False) -> None:
+    """Combines 'compile_for' and the 'write_*' functions."""
+
+    compile_for(target)
+
+    if win:
+        write_zip(target, get_file_name(out_suffix))
+    else:
+        write_tar(target, get_file_name(out_suffix))
+
+
+def get_file_name(suffix: str) -> None:
+    """Return the full path to one of the release packages."""
+
+    return f".release/rpack_toolbox_{suffix}"
+
+
+def main() -> None:
+    """The main logic of the program."""
+
+    target_count = len(TARGETS)
+
+    for i, args in enumerate(TARGETS):
+        info(f"Building target {i + 1}/{target_count}...")
+        target, suffix, win = args
+        build(target, suffix, win=win)
+
+    info("All done!")
+
+
+if __name__ == "__main__":
+    main()

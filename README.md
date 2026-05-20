@@ -126,6 +126,19 @@ $ cargo build --release --no-default-features -F cli
 ```
 -->
 
+If you're on 64-bit x86 Linux, you can also run `build.py` from the root to
+create the proper release packages (found under `.release/`), just make sure you
+have the proper dependencies installed (see `build.py`'s main docstring for
+more information):
+
+```bash
+python3 build.py
+```
+
+```bash
+pydoc3 build # Print the docstring
+```
+
 <!-- References -->
 
 [*Terraria*]: https://terraria.org
