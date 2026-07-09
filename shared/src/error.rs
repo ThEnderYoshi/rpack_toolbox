@@ -23,9 +23,21 @@ pub enum Error {
     #[error("invalid reference file `{}`: {message}", path.display())]
     BadRefFile { path: PathBuf, message: String },
 
+    /// Used when parsing an [`IVec2`][crate::jigsaw::cfg::IVec2] fails.
+    #[error("could not parse 2d vector '{0}'")]
+    ParseIVec2(String),
+
+    /// Used when parsing a [`PieceCfg`][crate::jigsaw::cfg::PieceCfg] fails.
+    #[error("could not parse jigsaw piece '{0}'")]
+    ParsePiece(String),
+
     /// Wrapper for [`csv::Error`].
     #[error("csv error: {0}")]
     Csv(#[from] csv::Error),
+
+    /// Wrapper for [`image::ImageError`].
+    #[error("image error: {0}")]
+    Image(#[from] image::ImageError),
 
     /// Wrapper for [`imagesize::ImageError`].
     #[error("image error: {0}")]
@@ -50,6 +62,10 @@ pub enum Error {
     /// Wrapper for [`tokio::task::JoinError`].
     #[error("async error: {0}")]
     TokioJoin(#[from] tokio::task::JoinError),
+
+    /// Wrapper for [`toml::de::Error`].
+    #[error("toml parse error: {0}")]
+    TomlDe(#[from] toml::de::Error),
 
     /// Wrapper for [`walkdir::Error`].
     #[error("walkdir error: {0}")]
@@ -77,5 +93,15 @@ impl Error {
             path: path.into(),
             message: message.into(),
         }
+    }
+
+    /// Creates an [`Error::ParseIVec2`].
+    pub fn parse_ivec2(raw: &str) -> Self {
+        Self::ParseIVec2(raw.into())
+    }
+
+    /// Creates an [`Error::ParsePiece`].
+    pub fn parse_piece(raw: &str) -> Self {
+        Self::ParsePiece(raw.into())
     }
 }

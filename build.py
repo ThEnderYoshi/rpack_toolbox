@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """build.py v1.0.0
 
     For Python 3.12.3
@@ -25,13 +26,23 @@
 
 import subprocess
 import tarfile
+import os
 
 from zipfile import ZipFile
 
 
+# The targets we're building
+# Format: (toolchain, archive_name, win)
 TARGETS = [
     ("x86_64-unknown-linux-gnu", "linux_x86_64", False),
     ("x86_64-pc-windows-gnu", "win_x86_64", True),
+]
+
+# The files/dirs to add to archives that have static paths
+# Format: (path, archive_path)
+# Dir paths are always added recursively
+STATIC_FILES = [
+    ("jigsaw", "jigsaw"),
 ]
 
 
@@ -69,6 +80,9 @@ def write_tar(target: str, path: str) -> None:
     with tarfile.open(path, "w:gz") as tar:
         tar.add(f"target/{target}/release/rpack_toolbox", "rpack_toolbox")
 
+        for sf_path, archive_path in STATIC_FILES:
+            tar.add(sf_path, archive_path)
+
 
 def write_zip(target: str, path: str) -> None:
     """Writes a release package as a zip file."""
@@ -82,6 +96,21 @@ def write_zip(target: str, path: str) -> None:
             "rpack_toolbox.exe",
         )
 
+        for sf_path, archive_path in STATIC_FILES:
+            if os.path.isfile(sf_path):
+                zip.write(sf_path, archive_path)
+                continue
+            elif not os.path.isdir(sf_path):
+                info(f"'{sf_path}': unsupported file type. skipping...")
+                continue
+
+            # Recursively add the items of static dirs
+            for dir_name, _, files in os.walk(sf_path):
+                for file in files:
+                    file = os.path.join(dir_name, file)
+                    file_rel = os.path.relpath(file, sf_path)
+                    zip.write(file, os.path.join(archive_path, file_rel))
+
 
 def build(target: str, out_suffix: str, win: bool = False) -> None:
     """Combines 'compile_for' and the 'write_*' functions."""
@@ -94,7 +123,7 @@ def build(target: str, out_suffix: str, win: bool = False) -> None:
         write_tar(target, get_file_name(out_suffix))
 
 
-def get_file_name(suffix: str) -> None:
+def get_file_name(suffix: str) -> str:
     """Return the full path to one of the release packages."""
 
     return f".release/rpack_toolbox_{suffix}"
@@ -109,6 +138,7 @@ def main() -> None:
         info(f"Building target {i + 1}/{target_count}...")
         target, suffix, win = args
         build(target, suffix, win=win)
+        info(f"Target {i + 1}/{target_count} complete\n")
 
     info("All done!")
 

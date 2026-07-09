@@ -8,6 +8,7 @@ use crate::{args::Job, reporter::CliReporter};
 pub mod args;
 
 mod generate;
+mod jigsaw;
 mod reporter;
 mod scan;
 
@@ -25,6 +26,11 @@ pub async fn run(args: args::Args) -> shared::Result<()> {
             ref_dir,
             dump,
         } => scan::run(content_dir, ref_dir, dump).await,
+        Job::Jigsaw {
+            config,
+            input,
+            output,
+        } => jigsaw::run(config, input, output).await,
     };
 
     debug!("Finished CLI frontend");

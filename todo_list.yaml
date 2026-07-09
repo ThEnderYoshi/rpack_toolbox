@@ -1,10 +1,14 @@
-# Things I still need to add (or would be nice to add) to this program
+# This is a list of things I still need to add (or would be nice to add) to
+# this program
 #
 # Items marked with '#!' should be finished in the current commit (ideally 🫵YOU
 # wouldn't see them..)
 #
 # Items marked with '#v <...>' should be finished by the time version
 # '<...>' releases
+BEFORE JIGSAW UPDATE:
+- add 'cargo test' to 'build.py' #v <jigsaw>
+  # The script should fail if not all tests pass
 app:
 - gui integration              #v <gui>
 - features to toggle frontends #v <gui>
@@ -13,8 +17,6 @@ generate:
 scan:
   gui: #v <gui>
 jigsaw:
-  shared:
-  cli:
   gui: #v <gui>
 build:
   shared:
@@ -24,11 +26,23 @@ nice to have:
   proper specs for the ref files:
   - flat ref
   - tree ref
-  - scan dump* # *There's a doc, but it's not a "proper" spec
+  - scan dump*
+  - jigsaw config*
+  # *There's a doc, but it's not a "proper" spec
   for invalid file names, have the scanner try to find similar names in the ref:
   optional suggestion list for scan:
   allow black/whitelisting asset kinds in scan:
   unify generate logic:
   unify scan logic:
   add a fake resource pack and references as examples:
-  add unit tests: # Depends on the item above
+  add tests:
+    # Depends on the item above
+    # Jigsaw already has a few tests, but we could always add more...
+  maybe return a non-0 exit code if Scan finds invalid items:
+    # Current exit codes:
+    #   0: Ok
+    #   1: Err
+    #   101: panic!()
+    # Maybe:
+    #   2?: Ok, but scan found an error
+  maybe convert these items into issues?:

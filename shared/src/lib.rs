@@ -2,6 +2,7 @@
 
 pub mod error;
 pub mod generate;
+pub mod jigsaw;
 pub mod reporter;
 pub mod rpack_data;
 pub mod scan;

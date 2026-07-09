@@ -74,4 +74,32 @@ pub enum Job {
         #[arg(long, short, value_parser)]
         dump: Option<Output>,
     },
+
+    /// Uses a config file to cut an image into pieces, reassemble them, then
+    /// write a new image
+    ///
+    /// This tool is useful to converting simpler tilesets into the more complex
+    /// ones Terraria expects, see the `jigsaw/` dir for some examples
+    Jigsaw {
+        /// Path the the config file to use
+        #[arg(value_parser = clap::value_parser!(ClioPath).is_file().exists())]
+        config: ClioPath,
+
+        /// Path to the input image
+        ///
+        /// If this points to a dir, all of its PNG files will be treated as
+        /// input images.
+        #[arg(value_parser = clap::value_parser!(ClioPath).exists())]
+        input: ClioPath,
+
+        /// Path to where the output image(s) will be written to.
+        ///
+        /// If this is an existing dir (or doesn't have a file extension), the
+        /// final image path(s) will be `<output>/<input_name>`.
+        ///
+        /// If there is only one input image, this may also be a path to a file
+        /// instead of a dir.
+        #[arg(value_parser)]
+        output: ClioPath,
+    },
 }

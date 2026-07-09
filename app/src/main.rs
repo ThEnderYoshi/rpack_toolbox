@@ -1,5 +1,8 @@
 //! This crate implements the main binary of the program.
 
+#[cfg(test)]
+mod tests;
+
 #[tokio::main]
 async fn main() -> shared::Result<()> {
     let result = run_cli().await;
