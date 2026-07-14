@@ -28,6 +28,27 @@ other useful information about your pack.
 
 Scan's insights can also be dumped to a JSON file for convenient automation.
 
+### Jigsaw
+
+> CLI command: `jigsaw`
+
+Uses a config file to take an image, cut it into pieces, then rearrange those
+pieces into a new image. This is useful for converting simpler tilesets into the
+more complicated tilesets used by Terraria.
+
+![an example output from the jigsaw tool](repo/demo_jigsaw_cli.png)
+
+Here are some examples of what Jigsaw can do, using the configs that come with
+the program:
+
+| Input                               | Config       | Output                                          |
+| :---------------------------------: | :----------: | :---------------------------------------------: |
+| ![three squares](jigsaw/wall.png)   | `wall.toml`  | ![a Terraria wall](repo/demo_jigsaw_wall.png)   |
+| ![a simple fence](jigsaw/fence.png) | `fence.toml` | ![a Terraria fence](repo/demo_jigsaw_fence.png) |
+
+The config files are just text files, so you can write your own configs and
+share them with others!
+
 ### Generate
 
 > CLI command: `gen`
@@ -72,6 +93,7 @@ to the `Assets` section, and download the file named after your system.
 Run the program from the command line with the following arguments:
 
 ```bash
+# Add the `.exe` on windows
 ./rpack_toolbox help gen
 ```
 
