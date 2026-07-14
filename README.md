@@ -46,8 +46,12 @@ the program:
 | ![three squares](jigsaw/wall.png)   | `wall.toml`  | ![a Terraria wall](repo/demo_jigsaw_wall.png)   |
 | ![a simple fence](jigsaw/fence.png) | `fence.toml` | ![a Terraria fence](repo/demo_jigsaw_fence.png) |
 
-The config files are just text files, so you can write your own configs and
-share them with others!
+> [!NOTE]
+> The input images are small because, unlike Terraria's assets, we can make the
+> inputs unscaled, then have Jigsaw scale the output up for us!
+
+The config are just text files, so you can [write your own
+configs](docs/jigsaw_config.md) and share them with others!
 
 ### Generate
 
