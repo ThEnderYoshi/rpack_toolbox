@@ -7,8 +7,9 @@
 # Items marked with '#v <...>' should be finished by the time version
 # '<...>' releases
 BEFORE JIGSAW UPDATE:
-- add 'cargo test' to 'build.py' #v <jigsaw>
+- add 'cargo test' to 'build.py' #v 0.3.0
   # The script should fail if not all tests pass
+  # Currently I can't get cross to compile tests for winslop
 app:
 - gui integration              #v <gui>
 - features to toggle frontends #v <gui>

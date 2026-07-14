@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""build.py v1.0.0
+"""build.py v1.2.0
 
     For Python 3.12.3
     By ThEnderYoshi, 2026
@@ -40,7 +40,7 @@ TARGETS = [
 
 # The files/dirs to add to archives that have static paths
 # Format: (path, archive_path)
-# Dir paths are always added recursively
+# Dir paths have their contents added recursively
 STATIC_FILES = [
     ("jigsaw", "jigsaw"),
 ]
@@ -52,23 +52,29 @@ def info(*args, **kwargs) -> None:
     print("[build.py]", *args, **kwargs)
 
 
-def compile_for(target: str) -> None:
-    """Compiles RPack Toolbox for the specified target."""
-
-    info(f"Compiling target '{target}'...")
-    args = ["cross", "build", "--release", "--target", target]
-
-    # HACK: For some reason I can't get cross to compile for the
+def run_cross(target: str, command: str) -> None:
+    # HACH: For some reason I can't get cross to compile for the
     # Linux target
-    if "linux" in target:
-        args[0] = "cargo"
+    prog = "cargo" if "linux" in target else "cross"
 
+    args = [prog, command, "--release", "--target", target]
+    arg_str = " ".join(args)
+
+    info("Executing:", arg_str)
     cmp = subprocess.run(args, text=True)
 
     if cmp.returncode != 0:
         raise RuntimeError(
-            f"'{" ".join(args)}' returned the non-0 code '{cmp.returncode}'",
+            f"'{arg_str}' returned the non-0 exit code '{cmp.returncode}'",
         )
+
+
+def compile_for(target: str) -> None:
+    """Compiles RPack Toolbox for the specified target."""
+
+    # FIXME: Tests fail to compile on windows (but not build)
+    # run_cross(target, "test")
+    run_cross(target, "build")
 
 
 def write_tar(target: str, path: str) -> None:
@@ -135,8 +141,8 @@ def main() -> None:
     target_count = len(TARGETS)
 
     for i, args in enumerate(TARGETS):
-        info(f"Building target {i + 1}/{target_count}...")
         target, suffix, win = args
+        info(f"Building target '{target}' ({i + 1}/{target_count})...")
         build(target, suffix, win=win)
         info(f"Target {i + 1}/{target_count} complete\n")
 
